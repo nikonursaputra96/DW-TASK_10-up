@@ -1,0 +1,258 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: rgb(213, 217, 222);
+    font-family: 'Poppins', sans-serif;
+
+}
+
+
+
+
+/* BOOTSTRAP FORM */
+#description{
+    height: 100px !important;
+    resize: none !important;
+}
+
+input[type="date"] {
+    color: transparent;
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: white no-repeat;
+    color: transparent;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.container {
+    width: 25vmax;
+}
+
+
+
+
+/* Card */
+
+.title h1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(238, 235, 235);
+    padding: 50px;
+    margin-bottom: -20px;
+}
+
+.container-master {
+    background-color: rgb(238, 235, 235);
+    word-break: break-all;
+}
+
+.container-card {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.container-card-2 {
+    width: 325px;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgb(153, 151, 151);
+    overflow: hidden;
+    padding: 10px;
+
+}
+
+.container-content {
+    margin: 5px;
+}
+
+.container-content h4 {
+    margin-top: 5px;
+}
+
+.container-content span {
+    font-size: 11px;
+    display: flex;
+    margin-bottom: 15px;
+    color: rgb(107, 104, 104);
+}
+
+.container-content p {
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+.container-logo {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.container-button {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.edit-button, .delete-button {
+    width: 100%;
+    height: 24px;
+    background-color: rgb(17, 23, 39);
+    border-radius: 7px;
+    color: white;
+    border: 0;
+    cursor: pointer;
+}
+
+/* image card */
+.logo-nodejs {
+    width: 25px;
+    height: 25px;
+}
+
+
+.logo-typescript, .logo-reactjs, .logo-nextjs {
+    width: 20px;
+    height: 20px;
+}
+
+.image-1 {
+    width: 295px;
+    height: auto;
+    border-radius: 10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* RESPONSIVE */
+@media only screen and (max-width : 575.98px) {
+
+    /* Navbar Bootstrap */
+    #navbarNav {
+        gap: 0 !important;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #buttonContactCont {
+        text-decoration: none;
+    }
+
+    #buttonContact {
+        display: flex;
+        margin: 0 auto;
+        background-color: rgb(244, 243, 243);
+        color: rgb(85, 85, 85);
+        text-decoration: none !important;
+        border: 0;
+        margin-top: -8px;
+    }
+
+    .container {
+        width: 40vmax;
+    }
+
+    .container-master {
+        overflow: hidden;
+    }
+
+}
+
+
+
+@media only screen and (min-width: 1224px) {
+
+}
+
+
+@media only screen and (min-width : 768px) and (max-width : 1024px) and (orientation : portrait) {
+
+    /* Navbar Bootstrap */
+    #navbarNav {
+        gap: 0 !important;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #buttonContactCont {
+        text-decoration: none;
+    }
+
+    #buttonContact {
+        display: flex;
+        margin: 0 auto;
+        background-color: rgb(244, 243, 243);
+        color: rgb(85, 85, 85);
+        text-decoration: none !important;
+        border: 0;
+        margin-top: -8px;
+    }
+
+    .container {
+        width: 40vmax;
+    }
+
+  
+
+
+
+
+}
