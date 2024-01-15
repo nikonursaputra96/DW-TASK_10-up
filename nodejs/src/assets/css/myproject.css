@@ -19,15 +19,11 @@ body {
 }
 
 input[type="date"] {
-    color: transparent;
     cursor: pointer;
+    font-size: 15px;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
-    background: white no-repeat;
-    color: transparent;
-    width: 16px;
-    height: 16px;
     cursor: pointer;
 }
 

@@ -31,7 +31,7 @@
 //             return Math.floor(day) + ' hari'
 //         } else {
 //             return totalMonth + ' bulan'
-//         }
+//         } 
 //     }
 
 //     const totalMonth = durationMonthDate(startDate, endDate);
