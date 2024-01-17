@@ -132,36 +132,39 @@
         {{#each data}}
         <div class="container-card">
             <div class="container-card-2">
-                <div class="container-content">
-                    <img src="assets/img/image1.jpg" alt="smartphone" class="image-1">
-                    <h4>{{name}}</h4>
-                    <span id="totalMonth">{{totalMonth}}</span>
-                    <a href="/detail/{{@index}}" class="text-reset"><p>{{description}}</p></a>
-                </div>
-                <div class="container-logo">
-                    {{#if program.first}}
-                    <img src='assets/icon/nodejs.png' alt="logo-nodejs" class="logo-nodejs" id="logo-nodejs">
-                    {{/if}}
-                    {{#if program.second}}
-                    <img src='assets/icon/reactjs.png' alt="logo-reactjs" class="logo-reactjs" id="logo-reactjs">
-                    {{/if}}
-                    {{#if program.third}}
-                    <img src='assets/icon/nextjs.png' alt="logo-nextjs" class="logo-nextjs" id="logo-nextjs">
-                    {{/if}}
-                    {{#if program.fourth}}
-                    <img src='assets/icon/typescript.png' alt="logo-typescript" class="logo-typescript"
-                        id="logo-typescript">
-                    {{/if}}
+                <div onclick="window.location.href='/detail/{{@index}}';">
+                    <div class="container-content">
+                        <img src="assets/img/image2.jpg" alt="smartphone" class="image-1">
+                        <h4>{{name}}</h4>
+                        <span id="totalMonth">{{totalMonth}}</span>
+                        <a href="/detail/{{@index}}" class="text-reset text-decoration-none">
+                            <p>{{description}}</p>
+                        </a>
+                    </div>
 
-
-
+                    <div class="container-logo">
+                        {{#if program.first}}
+                        <img src='assets/icon/nodejs.png' alt="logo-nodejs" class="logo-nodejs" id="logo-nodejs">
+                        {{/if}}
+                        {{#if program.second}}
+                        <img src='assets/icon/reactjs.png' alt="logo-reactjs" class="logo-reactjs" id="logo-reactjs">
+                        {{/if}}
+                        {{#if program.third}}
+                        <img src='assets/icon/nextjs.png' alt="logo-nextjs" class="logo-nextjs" id="logo-nextjs">
+                        {{/if}}
+                        {{#if program.fourth}}
+                        <img src='assets/icon/typescript.png' alt="logo-typescript" class="logo-typescript"
+                            id="logo-typescript">
+                        {{/if}}
+                    </div>
                 </div>
                 <div class="container-button">
                     <button class="edit-button">
                         <a href="/updatemyproject/{{@index}}" class="editx">edit</a>
                     </button>
                     <button class="delete-button">
-                        <a href="/delete/{{@index}}" onclick="return confirm('Delete this post?')" class="text-decoration-none text-reset">delete</a></button>
+                        <a href="/delete/{{@index}}" onclick="return confirm('Delete this post?')"
+                            class="text-decoration-none text-reset">delete</a></button>
                 </div>
             </div>
         </div>

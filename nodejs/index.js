@@ -34,63 +34,75 @@ function contact(req, res) {
 function myproject(req, res) {
 
   const title = 'Add My Project'
-  res.render('myproject', { data , title })
+  res.render('myproject', { data, title })
 }
+
 // Detail Data
 function handleDetailProject(req, res) {
-  const {id} = req.params
+  const { id } = req.params
   const dataDetail = data[id]
 
-  res.render('detail', {data : dataDetail})
+  res.render('detail', { data: dataDetail })
 }
 
 function testimonial(req, res) {
   res.render('testimonial')
 }
 
-
-
-// post data
-function handlePostProject(req, res) {
-  // Checkbox Data
-  let program = {
-    first: req.body.nodejs ? true : false,
-    second: req.body.reactjs ? true : false,
-    third: req.body.nextjs ? true : false,
-    fourth: req.body.typescript ? true : false,
+// Calculataion Total Month
+function durationMonth(startDateFirst, endDateFirst) {
+  let date = endDateFirst - startDateFirst
+  let month = date / (1000 * 60 * 60 * 24 * 30)
+  let totalMonth = Math.floor(month)
+  if (totalMonth === 1) {
+    return totalMonth + ' bulan'
+  } else if (totalMonth < 1) {
+    let day = date / (1000 * 60 * 60 * 24)
+    return Math.floor(day) + ' hari'
+  } else {
+    return totalMonth + ' bulan'
   }
+}
 
+// Format DD-MM-YYY
+function formatDate(dateFormat) {
+  const [year, month, day] = dateFormat.split('-')
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec']
+  return `${day}-${months[parseInt(month, 10) - 1]}-${year}`
+}
+
+// Checkbox data
+function reqProgram(body) {
+  return {
+    first: body.nodejs ? true : false,
+    second: body.reactjs ? true : false,
+    third: body.nextjs ? true : false,
+    fourth: body.typescript ? true : false,
+  }
+}
+
+
+// POST data
+function handlePostProject(req, res) {
+  const program = reqProgram(req.body)
   const { name, description, startdate, enddate } = req.body
 
-  // Date Data
+  
   const startDateFirst = new Date(startdate)
   const endDateFirst = new Date(enddate)
-
-  function durationMonth(startDateFirst, endDateFirst) {
-    let date = endDateFirst - startDateFirst
-    let month = date / (1000 * 60 * 60 * 24 * 30)
-    let totalMonth = Math.floor(month)
-    if (totalMonth === 1) {
-      return totalMonth + ' bulan'
-    } else if (totalMonth < 1) {
-      let day = date / (1000 * 60 * 60 * 24)
-      return Math.floor(day) + ' hari'
-    } else {
-      return totalMonth + ' bulan'
-    }
-  }
-
-  const totalMonth = durationMonth (startDateFirst,endDateFirst)
+  const totalMonth = durationMonth(startDateFirst, endDateFirst)
+  const startDateFormat = formatDate(startdate)
+  const endDateFormat = formatDate(enddate)
 
 
-  data.push({ name, description, program, totalMonth, startdate, enddate })
+  data.push({ name, description, program, totalMonth, startDateFormat, endDateFormat, startdate, enddate })
 
   res.redirect('/myproject')
 }
 
 
 
-// Delete Card
+// Delete Data
 function handleDeleteProject(req, res) {
   const { id } = req.params
 
@@ -99,47 +111,29 @@ function handleDeleteProject(req, res) {
 }
 
 
-// Edit Data
-function updateMyProject (req, res) {
-  const {id} = req.params;
+
+// Edit & Post Data
+function updateMyProject(req, res) {
+  const { id } = req.params;
   const editData = data[id]
-  res.render ('updatemyproject' , {id , editData})
+  res.render('updatemyproject', { id, data: editData })
 }
 
-function postMyProject (req, res) {
-  const {id} = req.params
+function postMyProject(req, res) {
+  const { id } = req.params
 
-  let program = {
-    first: req.body.nodejs ? true : false,
-    second: req.body.reactjs ? true : false,
-    third: req.body.nextjs ? true : false,
-    fourth: req.body.typescript ? true : false,
-  }
-
+  const program = reqProgram(req.body)
   const { name, description, startdate, enddate } = req.body
 
   const startDateFirst = new Date(startdate)
   const endDateFirst = new Date(enddate)
+  const totalMonth = durationMonth(startDateFirst, endDateFirst)
+  const startDateFormat = formatDate(startdate)
+  const endDateFormat = formatDate(enddate)
 
-  function durationMonth(startDateFirst, endDateFirst) {
-    let date = endDateFirst - startDateFirst
-    let month = date / (1000 * 60 * 60 * 24 * 30)
-    let totalMonth = Math.floor(month)
-    if (totalMonth === 1) {
-      return totalMonth + ' bulan'
-    } else if (totalMonth < 1) {
-      let day = date / (1000 * 60 * 60 * 24)
-      return Math.floor(day) + ' hari'
-    } else {
-      return totalMonth + ' bulan'
-    }
-  }
+  data[id] = { name, description, program, totalMonth, startDateFormat, endDateFormat, startdate, enddate}
 
-  const totalMonth = durationMonth (startDateFirst,endDateFirst)
-
-  data[id] = {name , description, program, totalMonth, startdate, enddate}
-
-  res.redirect ('/myproject')
+  res.redirect('/myproject')
 }
 
 app.listen(port, () => {
