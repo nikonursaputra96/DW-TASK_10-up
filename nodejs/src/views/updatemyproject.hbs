@@ -37,6 +37,27 @@
                         <a class="nav-link" href="/testimonial">Testimonial</a>
                     </li>
                 </ul>
+
+                {{#if isLogin}}
+                  <ul class="navbar-nav me-4 mb-2 mb-lg-0 gap-3" id="navbarNavLogin">
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold active text-danger" href="#">Hello, {{user}}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+                {{else}}
+                 <ul class="navbar-nav me-4 mb-2 mb-lg-0 gap-3" id="navbarNavLogin">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                </ul>
+                {{/if}}
+
                 <a href="/contact" id="buttonContactCont">
                     <button type="button" class="btn btn-dark" id="buttonContact">Contact Me</button>
                 </a>
@@ -50,20 +71,21 @@
         <form class="row g-3" action="/updatemyproject/{{id}}" method="POST">
             <div class="col-12">
                 <label for="projectName" class="form-label fw-bold">Project Name</label>
-                <input type="text" class="form-control" id="projectName" name="name" value="{{data.name}}">
+                <input type="text" class="form-control" id="projectName" name="name" value="{{data.authorName}}">
             </div>
             <div class="col-md-6">
                 <label for="startDate" class="form-label fw-bold">Start Date</label>
-                <input type="date" class="form-control" id="startDate" name="startdate" value="{{data.startdate}}">
+                <input type="date" class="form-control" id="startDate" name="startdate"
+                    value="{{data.formattedStartDate}}">
             </div>
             <div class="col-md-6">
                 <label for="endDate" class="form-label fw-bold">End Date</label>
-                <input type="date" class="form-control" id="endDate" name="enddate" value="{{data.enddate}}">
+                <input type="date" class="form-control" id="endDate" name="enddate" value="{{data.formattedEndDate}}">
             </div>
             <div>
                 <label class="mb-2 fw-bold" for="description">Description</label>
                 <div class="form-floating">
-                    <textarea class="form-control" id="description" name="description" >{{data.description}}</textarea>
+                    <textarea class="form-control" id="description" name="description">{{data.description}}</textarea>
                 </div>
             </div>
             <div>
@@ -71,13 +93,15 @@
                 <div class="col-12 d-flex">
                     <div class="col-6">
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="nodejs" name="nodejs" {{#if data.program.first}}checked{{/if}}>
+                            <input class="form-check-input" type="checkbox" id="nodejs" name="nodejs" {{#if
+                                data.technologies.first}}checked{{/if}}>
                             <label class="form-check-label" for="nodejs">
                                 Node JS
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="reactjs" name="reactjs" {{#if data.program.second}}checked{{/if}}>
+                            <input class="form-check-input" type="checkbox" id="reactjs" name="reactjs" {{#if
+                                data.technologies.second}}checked{{/if}}>
                             <label class="form-check-label" for="reactjs">
                                 React JS
                             </label>
@@ -86,13 +110,15 @@
 
                     <div>
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="nextjs" name="nextjs" {{#if data.program.third}}checked{{/if}}>
+                            <input class="form-check-input" type="checkbox" id="nextjs" name="nextjs" {{#if
+                                data.technologies.third}}checked{{/if}}>
                             <label class="form-check-label" for="nextjs">
                                 Next JS
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="typescript" name="typescript" {{#if data.program.fourth}}checked{{/if}}>
+                            <input class="form-check-input" type="checkbox" id="typescript" name="typescript" {{#if
+                                data.technologies.fourth}}checked{{/if}}>
                             <label class="form-check-label" for="typescript">
                                 TypeScript
                             </label>

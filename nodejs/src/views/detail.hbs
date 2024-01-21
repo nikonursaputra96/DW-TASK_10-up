@@ -36,6 +36,27 @@
                         <a class="nav-link" href="/testimonial">Testimonial</a>
                     </li>
                 </ul>
+
+                 {{#if isLogin}}
+                  <ul class="navbar-nav me-4 mb-2 mb-lg-0 gap-3" id="navbarNavLogin">
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold active text-danger" href="#">Hello, {{user}}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+                {{else}}
+                 <ul class="navbar-nav me-4 mb-2 mb-lg-0 gap-3" id="navbarNavLogin">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                </ul>
+                {{/if}}
+
                 <a href="/contact" id="buttonContactCont">
                     <button type="button" class="btn btn-dark" id="buttonContact">Contact Me</button>
                 </a>
@@ -48,7 +69,7 @@
 
     <div class="container-detail">
         <div class="title">
-            <h1>Dumbways - {{data.name}}</h1>
+            <h1>Dumbways - {{data.authorName}}</h1>
         </div>
         <div class="container-content">
             <div class="image">
@@ -58,30 +79,30 @@
                 <div class="duration">
                     <p class="duration-title">Duration</p>
                     <i class="fa-solid fa-calendar-days">
-                        <p class="duration-date" id="durationDate">{{data.startDateFormat}} - {{data.endDateFormat}}</p>
+                        <p class="duration-date" id="durationDate">{{formatStartDate}} - {{formatEndDate}}</p>
                     </i>
                     <i class="fa-regular fa-clock">
-                        <p class="duration-time" id="durationTime">{{data.totalMonth}}</p>
+                        <p class="duration-time" id="durationTime">{{totalMonth}}</p>
                     </i>
                 </div>
                 <div class="technologies">
                     <p class="technologies-title">Technologies</p>
                     <div class="techno-1">
-                        {{#if data.program.first}}
+                        {{#if data.technologies.first}}
                         <img src="/assets/icon/nodejs.png" alt="logo-nodejs" class="logo-nodejs" id="logo-nodejs">
                         <p class="p-nodejs">Node Js</p>
                         {{/if}}
-                        {{#if data.program.second}}
+                        {{#if data.technologies.second}}
                         <img src="/assets/icon/reactjs.png" alt="logo-reactjs" class="logo-reactjs" id="logo-reactjs">
                         <p class="p-reactjs">React Js</p>
                         {{/if}}
                     </div>
                     <div class="techno-2">
-                        {{#if data.program.third}}
+                        {{#if data.technologies.third}}
                         <img src="/assets/icon/nextjs.png" alt="logo-nextjs" class="logo-nextjs" id="logo-nextjs">
                         <p class="p-nextjs">Next JS</p>
                         {{/if}}
-                        {{#if data.program.fourth}}
+                        {{#if data.technologies.fourth}}
                         <img src="/assets/icon/typescript.png" alt="logo-typescript" class="logo-typescript"
                             id="logo-typescript">
                         <p class="p-typescript">TypeScript</p>

@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Testimonial</title>
+    <title>Register</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/testimonial.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
@@ -33,14 +33,14 @@
                         <a class="nav-link" href="/myproject">Add Project</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active fw-bold" aria-current="page" href="/testimonial">Testimonial</a>
+                        <a class="nav-link" href="/testimonial">Testimonial</a>
                     </li>
                 </ul>
 
-                {{#if isLogin}}
+              {{#if isLogin}}
                   <ul class="navbar-nav me-4 mb-2 mb-lg-0 gap-3" id="navbarNavLogin">
                     <li class="nav-item">
-                        <a class="nav-link fw-bold active text-danger" href="#">Hello, {{user}}</a>
+                        <a class="nav-link fw-bold active text-danger" href="/register">Hello, {{user}}</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">Logout</a>
@@ -49,7 +49,7 @@
                 {{else}}
                  <ul class="navbar-nav me-4 mb-2 mb-lg-0 gap-3" id="navbarNavLogin">
                     <li class="nav-item">
-                        <a class="nav-link" href="/register">Register</a>
+                        <a class="nav-link active fw-bold" href="#">Register</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/login">Login</a>
@@ -58,48 +58,36 @@
                 {{/if}}
 
                 <a href="/contact" id="buttonContactCont">
-                    <button type="button" class="btn btn-dark" id="buttonContact">Contact Me</button>
+                    <button type="button" class="btn btn-dark " aria-current="page" id="buttonContact">Contact
+                        Me</button>
                 </a>
             </div>
         </div>
     </nav>
 
-    <!-- Content Testimonial -->
-    <div class="testimonial-head">
-        <div class="title-testi">
-            <h2>My Testimonial</h2>
-        </div>
-        <div class="star-button">
-            <button class="btn btn-light btn-sm fs-6 text-reset fw-bold" onclick="testimonialAll()">ALL</button>
-            <button class="btn btn-light btn-sm text-reset fw-bold" onclick="testimonialButton(1)">
-                <i class="fa-solid fa-star">1</i>
-            </button>
-            <button class="btn btn-light btn-sm text-reset fw-bold" onclick="testimonialButton(2)">
-                <i class="fa-solid fa-star">2</i>
-            </button>
-            <button class="btn btn-light btn-sm text-reset fw-bold" onclick="testimonialButton(3)">
-                <i class="fa-solid fa-star">3</i>
-            </button>
-            <button class="btn btn-light btn-sm text-reset fw-bold" onclick="testimonialButton(4)">
-                <i class="fa-solid fa-star">4</i>
-            </button>
-            <button class="btn btn-light btn-sm text-reset fw-bold" onclick="testimonialButton(5)">
-                <i class="fa-solid fa-star">5</i>
-            </button>
-        </div>
-        <section class="testimonial-content" id="testimonialContent">
-            <!-- <div>
-                <img src="assets/img/luffy.jpg" alt="Person Picture" class="img-testi">
-                <p class="quote"> TEST</p>
-                <p class="author"> TEST 2</p>
-            </div> -->
-        </section>
 
-    </div>
-    <script src="assets/js/ajax.js"></script>
-    <!-- <script src="assets/js/testimonialHOF.js"></script> -->
-    <script src="assets/js/testimonial.js"></script>
+    <!-- register -->
+    <h4 class="d-flex justify-content-center mt-4 mb-5 mt-5 fw-bold">REGISTER YOUR ACCOUNT</h4>
+    <form id="contactContainer" class="mx-auto mt-4" action="/register" method="POST">
+        <div>
+            <label for="nama" class="form-label">Nama</label>
+            <input type="text" class="form-control" id="nama" name="nama">
+        </div>
+        <div class="mt-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" aria-describedby="emailHelp" name="email">
+        </div>
+        <div class="mt-3">
+            <label for="tel" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password">
+        </div>
+
+        <div class="d-flex justify-content-end mt-5">
+            <button type="submit" class="btn btn-dark rounded-pill btn-sm">Submit</button>
+        </div>
+    </form>
+
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
-</html>

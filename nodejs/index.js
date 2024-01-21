@@ -2,9 +2,33 @@ const express = require('express')
 const app = express()
 const port = 3000
 
+const dbPool = require('./src/connection/index')
+const bcrypt = require('bcrypt');
+const session = require('express-session')
+const flash = require('express-flash')
+
+// Sequelize config
+const { development } = require('./src/config/config.json')
+const { Sequelize, QueryTypes } = require('sequelize')
+const SequelizePool = new Sequelize(development)
+
 // use handlebars
 app.set('view engine', 'hbs')
 app.set('views', 'src/views')
+
+// Middleware express-session
+app.use(session({
+  cookie: {
+    httpOnly: true,
+    secure: false,
+    maxAge: 2 * 60 * 60 * 1000
+  },
+  resave: false,
+  store: session.MemoryStore(),
+  secret: 'session-storage',
+  saveUninitialized: true,
+}))
+app.use(flash())
 
 app.use('/assets', express.static('src/assets'))
 app.use(express.urlencoded({ extended: false })) //body parser
@@ -18,36 +42,176 @@ app.post('/myproject', handlePostProject)
 app.get('/delete/:id', handleDeleteProject)
 app.get('/updatemyproject/:id', updateMyProject)
 app.post('/updatemyproject/:id', postMyProject)
+app.get('/register', formRegister)
+app.post('/register', addRegister)
+app.get('/login', formLogin)
+app.post('/login', isLogin)
+app.get('/logout', isLogout)
 
 
 
 const data = []
 
+// function home (req,res) {
+//   dbPool.connect((err, client, done) => {
+//     if (err) throw err
+//     client.query(`SELECT * FROM "Authors"`, (err, result) => {
+//       done()
+//       if (err) throw err
+
+//       res.status(200).json(result)
+//     })
+//   })
+// }
+
+
 function home(req, res) {
-  res.render('index')
+  res.render('index' , {
+    isLogin: req.session.isLogin,
+    user: req.session.user
+  })
 }
 
+// REGISTER MENU
+function formRegister(req, res) {
+  res.render('register')
+}
+
+async function addRegister(req, res) {
+
+  try {
+    const { nama, email, password } = req.body
+    const salt = 10
+    bcrypt.hash(password, salt, async (err, hasPassword) => {
+      await SequelizePool.query(`INSERT INTO "Users" ("nama", "email", "password", "createdAt" , "updatedAt") VALUES ('${nama}', '${email}', '${hasPassword}', NOW() , NOW())`)
+      res.redirect('/login')
+
+    })
+  } catch (error) {
+    throw error
+  }
+}
+
+// LOGIN MENU
+function formLogin(req, res) {
+  res.render('login', {
+    isLogin: req.session.isLogin,
+    user: req.session.user
+  })
+}
+
+async function isLogin(req, res) {
+
+  try {
+    const { email, password } = req.body
+
+    const checkEmail = await SequelizePool.query(`SELECT * FROM "Users" WHERE "email"= '${email}'`, { type: QueryTypes.SELECT })
+
+    if (!checkEmail.length) {
+      req.flash('failed', 'Email is not registered')
+      return res.redirect('/login')
+    }
+
+    bcrypt.compare(password, checkEmail[0].password, function (err, result) {
+      if (!result) {
+        return res.redirect('/login')
+      } else {
+        req.session.isLogin = true
+        req.session.user = checkEmail[0].nama
+        req.flash('success', `Welcome ' ${checkEmail[0].nama} ' !!`)
+        return res.redirect('/')
+      }
+    });
+
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+
+
+// LOGOUT
+function isLogout(req, res) {
+  req.session.destroy()
+  res.redirect('/login')
+}
+
+
+// CONTACT ME
 function contact(req, res) {
-  res.render('contact')
+  res.render('contact' , {
+    isLogin: req.session.isLogin,
+    user: req.session.user
+  })
 }
 
-function myproject(req, res) {
 
-  const title = 'Add My Project'
-  res.render('myproject', { data, title })
+// RENDER MYPROJECT
+async function myproject(req, res) {
+
+  try {
+    const title = 'Add My Project'
+    const projectsQuery = await SequelizePool.query(`SELECT "Projects".*,"Authors"."name" as "authorName" FROM "Projects" LEFT JOIN "Authors" ON "Projects"."authorId" = "Authors"."id"`, { type: QueryTypes.SELECT })
+
+    const projectData = projectsQuery.map(res => ({
+      name: res.authorName,
+      totalMonth: durationMonth(res.startDate, res.endDate),
+      description: res.description,
+      program: res.technologies
+    }))
+
+    res.render('myproject', { 
+      projectData, 
+      title, 
+      isLogin: req.session.isLogin,
+      user: req.session.user 
+    })
+  } catch (error) {
+    throw error
+  }
 }
+
+
 
 // Detail Data
-function handleDetailProject(req, res) {
-  const { id } = req.params
-  const dataDetail = data[id]
+async function handleDetailProject(req, res) {
 
-  res.render('detail', { data: dataDetail })
+  try {
+    const { id } = req.params;
+    console.log('INI ADALAH ID', id)
+    const projectsQuery = await SequelizePool.query(`SELECT "Projects".*,"Authors"."name" as "authorName" FROM "Projects" LEFT JOIN "Authors" ON "Projects"."authorId" = "Authors"."id"`, { type: QueryTypes.SELECT })
+
+    const dataDetail = projectsQuery[0]
+
+
+    const totalMonth = durationMonth(dataDetail.startDate, dataDetail.endDate)
+    dataDetail.formattedStartDate = dataDetail.startDate.toISOString().split('T')[0];
+    dataDetail.formattedEndDate = dataDetail.endDate.toISOString().split('T')[0];
+    const formatStartDate = formatDate(dataDetail.formattedStartDate)
+    const formatEndDate = formatDate(dataDetail.formattedEndDate)
+
+    res.render('detail', { 
+      data: dataDetail, 
+      totalMonth, 
+      formatStartDate, 
+      formatEndDate,
+      isLogin: req.session.isLogin,
+      user: req.session.user
+    })
+  } catch (error) {
+    throw error
+  }
+
 }
 
 function testimonial(req, res) {
-  res.render('testimonial')
+  res.render('testimonial' , {
+    isLogin: req.session.isLogin,
+    user: req.session.user
+  })
 }
+
+
 
 // Calculataion Total Month
 function durationMonth(startDateFirst, endDateFirst) {
@@ -64,12 +228,16 @@ function durationMonth(startDateFirst, endDateFirst) {
   }
 }
 
+
+
 // Format DD-MM-YYY
 function formatDate(dateFormat) {
   const [year, month, day] = dateFormat.split('-')
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec']
   return `${day}-${months[parseInt(month, 10) - 1]}-${year}`
 }
+
+
 
 // Checkbox data
 function reqProgram(body) {
@@ -82,59 +250,110 @@ function reqProgram(body) {
 }
 
 
+
+
 // POST data
-function handlePostProject(req, res) {
-  const program = reqProgram(req.body)
-  const { name, description, startdate, enddate } = req.body
+async function handlePostProject(req, res) {
+  try {
+    const { name, description, startdate, enddate } = req.body
+    const program = reqProgram(req.body)
+    const startDateFirst = new Date(startdate)
+    const endDateFirst = new Date(enddate)
+    const totalMonth = durationMonth(startDateFirst, endDateFirst)
+    const startDateFormat = formatDate(startdate)
+    const endDateFormat = formatDate(enddate)
 
-  
-  const startDateFirst = new Date(startdate)
-  const endDateFirst = new Date(enddate)
-  const totalMonth = durationMonth(startDateFirst, endDateFirst)
-  const startDateFormat = formatDate(startdate)
-  const endDateFormat = formatDate(enddate)
+    const authorsQuery = await SequelizePool.query(`INSERT INTO "Authors" ("name") VALUES ('${name}') RETURNING id`)
 
 
-  data.push({ name, description, program, totalMonth, startDateFormat, endDateFormat, startdate, enddate })
+    const authorId = authorsQuery[0][0]?.id;
 
-  res.redirect('/myproject')
+
+    const projectsQuery = await SequelizePool.query(`INSERT INTO "Projects" ("startDate","endDate","description","technologies","authorId","createdAt","updatedAt") 
+    VALUES ('${startdate}','${enddate}','${description}','${JSON.stringify(program)}', '${authorId}' , NOW (), NOW())`)
+
+
+    res.redirect('/myproject')
+  } catch (error) {
+    throw error
+  }
+
 }
+
+
 
 
 
 // Delete Data
-function handleDeleteProject(req, res) {
-  const { id } = req.params
+async function handleDeleteProject(req, res) {
+  try {
 
-  data.splice(id, 1)
-  res.redirect('/myproject')
+    const { id } = req.params
+
+
+    const authorPick = await SequelizePool.query(`SELECT "authorId" FROM "Projects"`)
+
+    const authorMap = authorPick.map(results => results[0]?.authorId || null)
+    const targetAuthorId = authorMap.find(authorId => authorId !== null);
+
+   
+    const deleteProjects = await SequelizePool.query(`DELETE FROM "Projects" WHERE "authorId"=${targetAuthorId}`)
+    const deleteAuthors = await SequelizePool.query(`DELETE FROM "Authors" WHERE id=${targetAuthorId}`)
+
+    await Promise.all([deleteProjects, deleteAuthors])
+
+
+    res.redirect('/myproject')
+  } catch (error) {
+    throw error
+  }
 }
+
 
 
 
 // Edit & Post Data
-function updateMyProject(req, res) {
-  const { id } = req.params;
-  const editData = data[id]
-  res.render('updatemyproject', { id, data: editData })
+async function updateMyProject(req, res) {
+  try {
+
+    const { id } = req.params;
+    const projectsQuery = await SequelizePool.query(`SELECT "Projects".*,"Authors"."name" as "authorName" FROM "Projects" LEFT JOIN "Authors" ON "Projects"."authorId" = "Authors"."id"`, { type: QueryTypes.SELECT })
+
+    const editData = projectsQuery[0]
+    editData.formattedStartDate = editData.startDate.toISOString().split('T')[0];
+    editData.formattedEndDate = editData.endDate.toISOString().split('T')[0];
+
+    res.render('updatemyproject', { 
+      id, 
+      data: editData,
+      isLogin: req.session.isLogin,
+      user: req.session.user
+     })
+  } catch (error) {
+    throw error
+  }
 }
 
-function postMyProject(req, res) {
+
+
+
+// POST AFTER EDIT
+async function postMyProject(req, res) {
   const { id } = req.params
-
-  const program = reqProgram(req.body)
   const { name, description, startdate, enddate } = req.body
+  const program = reqProgram(req.body)
 
-  const startDateFirst = new Date(startdate)
-  const endDateFirst = new Date(enddate)
-  const totalMonth = durationMonth(startDateFirst, endDateFirst)
-  const startDateFormat = formatDate(startdate)
-  const endDateFormat = formatDate(enddate)
+  const authorPick = await SequelizePool.query(`SELECT "authorId" FROM "Projects"`)
+  const authorMap = authorPick.map(results => results[0]?.authorId || null)
+  const targetAuthorId = authorMap.find(authorId => authorId !== null);
 
-  data[id] = { name, description, program, totalMonth, startDateFormat, endDateFormat, startdate, enddate}
-
+  const updateAuthor = await SequelizePool.query(`UPDATE "Authors" SET "name"='${name}' WHERE id=(SELECT "authorId" FROM "Projects" WHERE id='${targetAuthorId}')`)
+  const updateProject = await SequelizePool.query(`UPDATE "Projects" SET "startDate"='${startdate}', "endDate"='${enddate}', "description"='${description}', "technologies"='${JSON.stringify(program)}' WHERE id='${targetAuthorId}'`)
+  console.log('Ini adalah author=', updateAuthor, 'ini adalah projects=', updateProject)
   res.redirect('/myproject')
 }
+
+
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
