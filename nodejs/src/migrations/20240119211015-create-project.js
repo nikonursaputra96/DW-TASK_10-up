@@ -25,7 +25,13 @@ module.exports = {
         type: Sequelize.STRING
       },
       authorId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+          references: {
+            model: 'Authors',
+            key: 'id'
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE'
       },
       createdAt: {
         allowNull: false,

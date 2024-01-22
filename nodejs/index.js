@@ -151,18 +151,19 @@ async function myproject(req, res) {
 
   try {
     const title = 'Add My Project'
-    const projectsQuery = await SequelizePool.query(`SELECT "Projects".*,"Authors"."name" as "authorName" FROM "Projects" LEFT JOIN "Authors" ON "Projects"."authorId" = "Authors"."id"`, { type: QueryTypes.SELECT })
 
-    const projectData = projectsQuery.map(res => ({
-      name: res.authorName,
-      totalMonth: durationMonth(res.startDate, res.endDate),
-      description: res.description,
-      program: res.technologies
+    const projects = await SequelizePool.query(`SELECT * FROM "Projects"`, { type: QueryTypes.SELECT })
+    const authors = await SequelizePool.query(`SELECT * FROM "Authors"`, { type: QueryTypes.SELECT })
+
+    const projectData = projects.map ((project,authorIndex) => ({
+      project : project,
+      author : authors[authorIndex],
+      totalMonth : durationMonth(project.startDate, project.endDate)
     }))
 
     res.render('myproject', { 
       projectData, 
-      title, 
+      title,
       isLogin: req.session.isLogin,
       user: req.session.user 
     })
@@ -171,6 +172,27 @@ async function myproject(req, res) {
   }
 }
 
+// POST MYPROJECT
+async function handlePostProject(req, res) {
+  try {
+    const { name, description, startdate, enddate } = req.body
+    const program = reqProgram(req.body)
+
+    const authorsGetId = await SequelizePool.query(`INSERT INTO "Authors" ("name") VALUES ('${name}') RETURNING "id"`)
+    const authorsId = authorsGetId[0][0].id
+
+    await SequelizePool.query(`INSERT INTO "Projects" ("startDate","endDate","description","technologies","authorId","createdAt","updatedAt") 
+    VALUES ('${startdate}','${enddate}','${description}','${JSON.stringify(program)}','${authorsId}' , NOW (), NOW())`)
+
+
+    res.redirect('/myproject')
+  } catch (error) {
+    throw error
+  }
+
+}
+
+
 
 
 // Detail Data
@@ -178,12 +200,11 @@ async function handleDetailProject(req, res) {
 
   try {
     const { id } = req.params;
-    console.log('INI ADALAH ID', id)
-    const projectsQuery = await SequelizePool.query(`SELECT "Projects".*,"Authors"."name" as "authorName" FROM "Projects" LEFT JOIN "Authors" ON "Projects"."authorId" = "Authors"."id"`, { type: QueryTypes.SELECT })
+    const projectsQuery = await SequelizePool.query(`SELECT "Projects".*, "Authors"."name" FROM "Projects" INNER JOIN "Authors" ON "Projects"."authorId" = "Authors"."id" WHERE "authorId" = ${id}`, { type: QueryTypes.SELECT })
 
     const dataDetail = projectsQuery[0]
 
-
+    console.log (dataDetail,'ni data detail gaes')
     const totalMonth = durationMonth(dataDetail.startDate, dataDetail.endDate)
     dataDetail.formattedStartDate = dataDetail.startDate.toISOString().split('T')[0];
     dataDetail.formattedEndDate = dataDetail.endDate.toISOString().split('T')[0];
@@ -251,57 +272,13 @@ function reqProgram(body) {
 
 
 
-
-// POST data
-async function handlePostProject(req, res) {
-  try {
-    const { name, description, startdate, enddate } = req.body
-    const program = reqProgram(req.body)
-    const startDateFirst = new Date(startdate)
-    const endDateFirst = new Date(enddate)
-    const totalMonth = durationMonth(startDateFirst, endDateFirst)
-    const startDateFormat = formatDate(startdate)
-    const endDateFormat = formatDate(enddate)
-
-    const authorsQuery = await SequelizePool.query(`INSERT INTO "Authors" ("name") VALUES ('${name}') RETURNING id`)
-
-
-    const authorId = authorsQuery[0][0]?.id;
-
-
-    const projectsQuery = await SequelizePool.query(`INSERT INTO "Projects" ("startDate","endDate","description","technologies","authorId","createdAt","updatedAt") 
-    VALUES ('${startdate}','${enddate}','${description}','${JSON.stringify(program)}', '${authorId}' , NOW (), NOW())`)
-
-
-    res.redirect('/myproject')
-  } catch (error) {
-    throw error
-  }
-
-}
-
-
-
-
-
 // Delete Data
 async function handleDeleteProject(req, res) {
   try {
 
-    const { id } = req.params
-
-
-    const authorPick = await SequelizePool.query(`SELECT "authorId" FROM "Projects"`)
-
-    const authorMap = authorPick.map(results => results[0]?.authorId || null)
-    const targetAuthorId = authorMap.find(authorId => authorId !== null);
-
-   
-    const deleteProjects = await SequelizePool.query(`DELETE FROM "Projects" WHERE "authorId"=${targetAuthorId}`)
-    const deleteAuthors = await SequelizePool.query(`DELETE FROM "Authors" WHERE id=${targetAuthorId}`)
-
-    await Promise.all([deleteProjects, deleteAuthors])
-
+  const { id } = req.params
+  await SequelizePool.query(`DELETE FROM "Projects" WHERE "authorId"=${id}`)
+  await SequelizePool.query(`DELETE FROM "Authors" WHERE "id"=${id}`)
 
     res.redirect('/myproject')
   } catch (error) {
@@ -315,15 +292,16 @@ async function handleDeleteProject(req, res) {
 // Edit & Post Data
 async function updateMyProject(req, res) {
   try {
-
+    
     const { id } = req.params;
-    const projectsQuery = await SequelizePool.query(`SELECT "Projects".*,"Authors"."name" as "authorName" FROM "Projects" LEFT JOIN "Authors" ON "Projects"."authorId" = "Authors"."id"`, { type: QueryTypes.SELECT })
+    const projectsQuery = await SequelizePool.query(`SELECT "Projects".*, "Authors"."name" FROM "Projects" INNER JOIN "Authors" ON "Projects"."authorId" = "Authors"."id" WHERE "authorId" = ${id}`, { type: QueryTypes.SELECT })
 
     const editData = projectsQuery[0]
+    
     editData.formattedStartDate = editData.startDate.toISOString().split('T')[0];
     editData.formattedEndDate = editData.endDate.toISOString().split('T')[0];
 
-    res.render('updatemyproject', { 
+    res.render('updatemyproject', {
       id, 
       data: editData,
       isLogin: req.session.isLogin,
@@ -343,13 +321,9 @@ async function postMyProject(req, res) {
   const { name, description, startdate, enddate } = req.body
   const program = reqProgram(req.body)
 
-  const authorPick = await SequelizePool.query(`SELECT "authorId" FROM "Projects"`)
-  const authorMap = authorPick.map(results => results[0]?.authorId || null)
-  const targetAuthorId = authorMap.find(authorId => authorId !== null);
-
-  const updateAuthor = await SequelizePool.query(`UPDATE "Authors" SET "name"='${name}' WHERE id=(SELECT "authorId" FROM "Projects" WHERE id='${targetAuthorId}')`)
-  const updateProject = await SequelizePool.query(`UPDATE "Projects" SET "startDate"='${startdate}', "endDate"='${enddate}', "description"='${description}', "technologies"='${JSON.stringify(program)}' WHERE id='${targetAuthorId}'`)
-  console.log('Ini adalah author=', updateAuthor, 'ini adalah projects=', updateProject)
+  await SequelizePool.query(`UPDATE "Authors" SET "name"='${name}' WHERE "id" = ${id}`)
+  await SequelizePool.query(`UPDATE "Projects" SET "startDate"='${startdate}', "endDate"='${enddate}', "description"='${description}', "technologies"='${JSON.stringify(program)}' WHERE "authorId"= ${id}`)
+  
   res.redirect('/myproject')
 }
 
