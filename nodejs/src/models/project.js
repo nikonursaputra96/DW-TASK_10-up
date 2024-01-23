@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Project.belongsTo(models.Author, {foreignKey :'authorId', onDelete:'CASCADE', onUpdate:'CASCADE'})
+      
     }
   }
   Project.init({
@@ -20,7 +20,8 @@ module.exports = (sequelize, DataTypes) => {
     description: DataTypes.TEXT,
     technologies: DataTypes.JSON,
     uploadImage: DataTypes.STRING,
-    authorId: DataTypes.INTEGER
+    authorId: DataTypes.INTEGER,
+    userId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Project',

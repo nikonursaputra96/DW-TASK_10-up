@@ -156,39 +156,41 @@
         {{#each projectData}}
         <div class="container-card">
             <div class="container-card-2">
-                <div onclick="window.location.href='/detail/{{author.id}}';">
+                <div onclick="window.location.href='/detail/{{this.authorId}}';">
                     <div class="container-content">
                         <img src="assets/img/image2.jpg" alt="smartphone" class="image-1">
-                        <h4>{{author.name}}</h4>
+                        <h4>{{this.author_name}}</h4>
                         <span id="totalMonth">{{this.totalMonth}}</span>
-                        <a href="/detail/{{author.id}}" class="text-reset text-decoration-none">
-                            <p>{{project.description}}</p>
+                        <a href="/detail/{{this.authorId}}" class="text-reset text-decoration-none">
+                            <p>{{this.description}}</p>
                         </a>
                     </div>
 
                     <div class="container-logo">
-                        {{#if project.technologies.first}}
+                        {{#if this.technologies.first}}
                         <img src='assets/icon/nodejs.png' alt="logo-nodejs" class="logo-nodejs" id="logo-nodejs">
                         {{/if}}
-                        {{#if project.technologies.second}}
+                        {{#if this.technologies.second}}
                         <img src='assets/icon/reactjs.png' alt="logo-reactjs" class="logo-reactjs" id="logo-reactjs">
                         {{/if}}
-                        {{#if project.technologies.third}}
+                        {{#if this.technologies.third}}
                         <img src='assets/icon/nextjs.png' alt="logo-nextjs" class="logo-nextjs" id="logo-nextjs">
                         {{/if}}
-                        {{#if project.technologies.fourth}}
+                        {{#if this.technologies.fourth}}
                         <img src='assets/icon/typescript.png' alt="logo-typescript" class="logo-typescript"
                             id="logo-typescript">
                         {{/if}}
                     </div>
                 </div>
                 <div class="container-button">
+                {{#if isLogin}}
                     <button class="edit-button">
-                        <a href="/updatemyproject/{{author.id}}" class="editx">edit</a>
+                        <a href="/updatemyproject/{{this.authorId}}" class="editx">edit</a>
                     </button>
                     <button class="delete-button">
-                        <a href="/delete/{{author.id}}" onclick="return confirm('Delete this post?')"
+                        <a href="/delete/{{this.authorId}}" onclick="return confirm('Delete this post?')"
                             class="text-decoration-none text-reset">delete</a></button>
+                {{/if}}
                 </div>
             </div>
         </div>
