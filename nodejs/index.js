@@ -3,6 +3,7 @@ const app = express()
 const port = 3000
 
 const dbPool = require('./src/connection/index')
+const upload = require ('./src/middleware/uploadFile')
 const bcrypt = require('bcrypt');
 const session = require('express-session')
 const flash = require('express-flash')
@@ -31,6 +32,7 @@ app.use(session({
 app.use(flash())
 
 app.use('/assets', express.static('src/assets'))
+app.use('/upload', express.static('src/upload'))
 app.use(express.urlencoded({ extended: false })) //body parser
 
 app.get('/', home)
@@ -38,10 +40,10 @@ app.get('/contact', contact)
 app.get('/myproject', myproject)
 app.get('/detail/:id', handleDetailProject)
 app.get('/testimonial', testimonial)
-app.post('/myproject', handlePostProject)
+app.post('/myproject', upload.single('image'), handlePostProject)
 app.get('/delete/:id', handleDeleteProject)
 app.get('/updatemyproject/:id', updateMyProject)
-app.post('/updatemyproject/:id', postMyProject)
+app.post('/updatemyproject/:id',upload.single('image'), postMyProject)
 app.get('/register', formRegister)
 app.post('/register', addRegister)
 app.get('/login', formLogin)
@@ -156,12 +158,11 @@ async function myproject(req, res) {
     let data;
   
     if (req.session.isLogin) {
-      data = await SequelizePool.query(`SELECT "Projects".*, "Authors"."name" AS author_name, "Users"."nama" AS user_name FROM "Projects" INNER JOIN "Authors" ON "Projects"."authorId" = "Authors"."id" INNER JOIN "Users" ON "Projects"."userid"="Users"."id" WHERE "Projects"."userid" = ${req.session.idUser}`)
+      data = await SequelizePool.query(`SELECT "Projects".*, "Authors"."name" AS author_name, "Users"."nama" AS user_name FROM "Projects" INNER JOIN "Authors" ON "Projects"."authorId" = "Authors"."id" INNER JOIN "Users" ON "Projects"."userid"="Users"."id" WHERE "Projects"."userid" = ${req.session.idUser} ORDER BY "Projects"."authorId" DESC`)
     } else {
-      data = await SequelizePool.query(`SELECT "Projects".*, "Authors"."name" AS author_name, "Users"."nama" AS user_name FROM "Projects" INNER JOIN "Authors" ON "Projects"."authorId" = "Authors"."id" INNER JOIN "Users" ON "Projects"."userid"="Users"."id"`)
+      data = await SequelizePool.query(`SELECT "Projects".*, "Authors"."name" AS author_name, "Users"."nama" AS user_name FROM "Projects" INNER JOIN "Authors" ON "Projects"."authorId" = "Authors"."id" INNER JOIN "Users" ON "Projects"."userid"="Users"."id" ORDER BY "Projects"."authorId" DESC`)
     }
 
-    
     const projectData = data[0].map( res => ({
       ...res,
       totalMonth: durationMonth(res.startDate, res.endDate),
@@ -182,15 +183,18 @@ async function myproject(req, res) {
 // POST MYPROJECT
 async function handlePostProject(req, res) {
   try {
-    const { name, description, startdate, enddate } = req.body
+    const { name, description, startdate, enddate} = req.body
     const program = reqProgram(req.body)
+    const image = req.file.filename
     const userid = req.session.idUser
+
+
 
     const authorsGetId = await SequelizePool.query(`INSERT INTO "Authors" ("name") VALUES ('${name}') RETURNING "id"`)
     const authorsId = authorsGetId[0][0].id
 
-    await SequelizePool.query(`INSERT INTO "Projects" ("startDate","endDate","description","technologies","authorId","createdAt","updatedAt","userid") 
-    VALUES ('${startdate}','${enddate}','${description}','${JSON.stringify(program)}','${authorsId}' , NOW (), NOW(),
+    await SequelizePool.query(`INSERT INTO "Projects" ("startDate","endDate","description","technologies","uploadImage","authorId","createdAt","updatedAt","userid") 
+    VALUES ('${startdate}','${enddate}','${description}','${JSON.stringify(program)}', '${image}' ,'${authorsId}' , NOW (), NOW(),
     '${userid}')`)
 
     
@@ -329,10 +333,11 @@ async function postMyProject(req, res) {
   const { id } = req.params
   const { name, description, startdate, enddate } = req.body
   const program = reqProgram(req.body)
+  const image = req.file.filename
   const userid = req.session.idUser
 
   await SequelizePool.query(`UPDATE "Authors" SET "name"='${name}' WHERE "id" = ${id}`)
-  await SequelizePool.query(`UPDATE "Projects" SET "startDate"='${startdate}', "endDate"='${enddate}', "description"='${description}', "technologies"='${JSON.stringify(program)}', "userid"='${userid}' WHERE "authorId"= ${id}`)
+  await SequelizePool.query(`UPDATE "Projects" SET "startDate"='${startdate}', "endDate"='${enddate}', "description"='${description}', "technologies"='${JSON.stringify(program)}',"uploadImage"='${image}', "userid"='${userid}' WHERE "authorId"= ${id}`)
   
   res.redirect('/myproject')
 }
