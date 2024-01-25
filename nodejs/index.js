@@ -3,7 +3,7 @@ const app = express()
 const port = 3000
 
 const dbPool = require('./src/connection/index')
-const upload = require ('./src/middleware/uploadFile')
+const upload = require('./src/middleware/uploadFile')
 const bcrypt = require('bcrypt');
 const session = require('express-session')
 const flash = require('express-flash')
@@ -43,7 +43,7 @@ app.get('/testimonial', testimonial)
 app.post('/myproject', upload.single('image'), handlePostProject)
 app.get('/delete/:id', handleDeleteProject)
 app.get('/updatemyproject/:id', updateMyProject)
-app.post('/updatemyproject/:id',upload.single('image'), postMyProject)
+app.post('/updatemyproject/:id', upload.single('image'), postMyProject)
 app.get('/register', formRegister)
 app.post('/register', addRegister)
 app.get('/login', formLogin)
@@ -52,7 +52,7 @@ app.get('/logout', isLogout)
 
 
 
-const data = []
+
 
 // function home (req,res) {
 //   dbPool.connect((err, client, done) => {
@@ -68,7 +68,7 @@ const data = []
 
 
 function home(req, res) {
-  res.render('index' , {
+  res.render('index', {
     isLogin: req.session.isLogin,
     user: req.session.user
   })
@@ -86,6 +86,7 @@ async function addRegister(req, res) {
     const salt = 10
     bcrypt.hash(password, salt, async (err, hasPassword) => {
       await SequelizePool.query(`INSERT INTO "Users" ("nama", "email", "password", "createdAt" , "updatedAt") VALUES ('${nama}', '${email}', '${hasPassword}', NOW() , NOW())`)
+      req.flash('success', 'Success, Please login !!')
       res.redirect('/login')
 
     })
@@ -142,7 +143,7 @@ function isLogout(req, res) {
 
 // CONTACT ME
 function contact(req, res) {
-  res.render('contact' , {
+  res.render('contact', {
     isLogin: req.session.isLogin,
     user: req.session.user
   })
@@ -156,7 +157,7 @@ async function myproject(req, res) {
     const title = 'Add My Project'
 
     let data;
-  
+
     if (req.session.isLogin) {
       data = await SequelizePool.query(`SELECT "Projects".*, "Authors"."name" AS author_name, "Users"."nama" AS user_name FROM "Projects" INNER JOIN "Authors" ON "Projects"."authorId" = "Authors"."id" INNER JOIN "Users" ON "Projects"."userid"="Users"."id" WHERE "Projects"."userid" = ${req.session.idUser} ORDER BY "Projects"."authorId" DESC`)
     } else {
@@ -164,18 +165,18 @@ async function myproject(req, res) {
     }
 
 
-    const projectData = data[0].map( res => ({
+    const projectData = data[0].map(res => ({
       ...res,
       totalMonth: durationMonth(res.startDate, res.endDate),
       isLogin: req.session.isLogin
     }))
 
 
-    res.render('myproject', { 
+    res.render('myproject', {
       projectData,
       title,
       isLogin: req.session.isLogin,
-      user: req.session.user 
+      user: req.session.user
     })
   } catch (error) {
     throw error
@@ -185,7 +186,7 @@ async function myproject(req, res) {
 // POST MYPROJECT
 async function handlePostProject(req, res) {
   try {
-    const { name, description, startdate, enddate} = req.body
+    const { name, description, startdate, enddate } = req.body
     const program = reqProgram(req.body)
     const image = req.file.filename
     const userid = req.session.idUser
@@ -199,7 +200,7 @@ async function handlePostProject(req, res) {
     VALUES ('${startdate}','${enddate}','${description}','${JSON.stringify(program)}', '${image}' ,'${authorsId}' , NOW (), NOW(),
     '${userid}')`)
 
-    
+
     res.redirect('/myproject')
   } catch (error) {
     throw error
@@ -226,10 +227,10 @@ async function handleDetailProject(req, res) {
     const formatStartDate = formatDate(dataDetail.formattedStartDate)
     const formatEndDate = formatDate(dataDetail.formattedEndDate)
 
-    res.render('detail', { 
-      data: dataDetail, 
-      totalMonth, 
-      formatStartDate, 
+    res.render('detail', {
+      data: dataDetail,
+      totalMonth,
+      formatStartDate,
       formatEndDate,
       isLogin: req.session.isLogin,
       user: req.session.user
@@ -241,7 +242,7 @@ async function handleDetailProject(req, res) {
 }
 
 function testimonial(req, res) {
-  res.render('testimonial' , {
+  res.render('testimonial', {
     isLogin: req.session.isLogin,
     user: req.session.user
   })
@@ -291,10 +292,10 @@ function reqProgram(body) {
 async function handleDeleteProject(req, res) {
   try {
 
-  const { id } = req.params
-  await SequelizePool.query(`DELETE FROM "Projects" WHERE "authorId"=${id}`)
-  await SequelizePool.query(`DELETE FROM "Authors" WHERE "id"=${id}`)
-  
+    const { id } = req.params
+    await SequelizePool.query(`DELETE FROM "Projects" WHERE "authorId"=${id}`)
+    await SequelizePool.query(`DELETE FROM "Authors" WHERE "id"=${id}`)
+
     res.redirect('/myproject')
   } catch (error) {
     throw error
@@ -307,7 +308,7 @@ async function handleDeleteProject(req, res) {
 // Edit & Post Data
 async function updateMyProject(req, res) {
   try {
-    
+
     const { id } = req.params;
     const projectsQuery = await SequelizePool.query(`SELECT "Projects".*, "Authors"."name" FROM "Projects" INNER JOIN "Authors" ON "Projects"."authorId" = "Authors"."id" WHERE "authorId" = ${id} ORDER BY "Projects"."authorId" DESC`, { type: QueryTypes.SELECT })
 
@@ -315,14 +316,16 @@ async function updateMyProject(req, res) {
     
     editData.formattedStartDate = editData.startDate.toISOString().split('T')[0];
     editData.formattedEndDate = editData.endDate.toISOString().split('T')[0];
+    // untuk memisahkan format tanggal di dalam projectQuery[0] 2024-01-24T07:51:55.356Z, membagi berdasarkan T dalam 2 bagian 2024-01-24 dan 07:51:55.356Z [0] merujuk ke elemen ke 1 pada array (pertanyaan persentasi)
+    console.log(editData, editData.formattedStartDate)
 
     res.render('updatemyproject', {
-      id, 
+      id,
       data: editData,
       isLogin: req.session.isLogin,
       user: req.session.user,
-      defaultImage : editData.uploadImage
-     })
+      defaultImage: editData.uploadImage
+    })
   } catch (error) {
     throw error
   }
@@ -333,25 +336,32 @@ async function updateMyProject(req, res) {
 
 // POST AFTER EDIT
 async function postMyProject(req, res) {
-  const { id } = req.params
-  const { name, description, startdate, enddate } = req.body
-  const program = reqProgram(req.body)
-  const userid = req.session.idUser
-  const existingImage = await SequelizePool.query(`SELECT "uploadImage" FROM "Projects" WHERE "authorId" = ${id}`)
-  let image
+  try {
+    const { id } = req.params
+    const { name, description, startdate, enddate } = req.body
+    const program = reqProgram(req.body)
+    const userid = req.session.idUser
+    const existingImage = await SequelizePool.query(`SELECT "uploadImage" FROM "Projects" WHERE "authorId" = ${id}`)
+    let image
 
-  if(req.file) {
-    image = req.file.filename
-  } else {
-    image = existingImage[0][0].uploadImage
+    if (req.file) {
+      image = req.file.filename
+    } else {
+      image = existingImage[0][0].uploadImage
+    }
+
+    await SequelizePool.query(`UPDATE "Authors" SET "name"='${name}' WHERE "id" = ${id}`)
+    await SequelizePool.query(`UPDATE "Projects" SET "startDate"='${startdate}', "endDate"='${enddate}', "description"='${description}', "technologies"='${JSON.stringify(program)}',"uploadImage"='${image}', "userid"='${userid}' WHERE "authorId"= ${id}`)
+
+    res.redirect('/myproject')
+  } catch (error) {
+    throw new error
   }
 
-  await SequelizePool.query(`UPDATE "Authors" SET "name"='${name}' WHERE "id" = ${id}`)
-  await SequelizePool.query(`UPDATE "Projects" SET "startDate"='${startdate}', "endDate"='${enddate}', "description"='${description}', "technologies"='${JSON.stringify(program)}',"uploadImage"='${image}', "userid"='${userid}' WHERE "authorId"= ${id}`)
-  
-  res.redirect('/myproject')
 }
 
+// sebaiknya menggunakan try and catch pada post my project untuk penanganan error/error handling(sebelumnya tidak ada try and catch pada function ini) 
+//async/asynchronus menjalankan program secara asyncronus dan ada implisit await didalamnya untuk menghentikan sementara ekskusi fungsinya ketika menunggu promisenya(ambil data di server) agar tidak pending 
 
 
 app.listen(port, () => {
