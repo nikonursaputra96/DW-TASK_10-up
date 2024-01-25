@@ -163,11 +163,13 @@ async function myproject(req, res) {
       data = await SequelizePool.query(`SELECT "Projects".*, "Authors"."name" AS author_name, "Users"."nama" AS user_name FROM "Projects" INNER JOIN "Authors" ON "Projects"."authorId" = "Authors"."id" INNER JOIN "Users" ON "Projects"."userid"="Users"."id" ORDER BY "Projects"."authorId" DESC`)
     }
 
+
     const projectData = data[0].map( res => ({
       ...res,
       totalMonth: durationMonth(res.startDate, res.endDate),
       isLogin: req.session.isLogin
     }))
+
 
     res.render('myproject', { 
       projectData,
@@ -307,7 +309,7 @@ async function updateMyProject(req, res) {
   try {
     
     const { id } = req.params;
-    const projectsQuery = await SequelizePool.query(`SELECT "Projects".*, "Authors"."name" FROM "Projects" INNER JOIN "Authors" ON "Projects"."authorId" = "Authors"."id" WHERE "authorId" = ${id}`, { type: QueryTypes.SELECT })
+    const projectsQuery = await SequelizePool.query(`SELECT "Projects".*, "Authors"."name" FROM "Projects" INNER JOIN "Authors" ON "Projects"."authorId" = "Authors"."id" WHERE "authorId" = ${id} ORDER BY "Projects"."authorId" DESC`, { type: QueryTypes.SELECT })
 
     const editData = projectsQuery[0]
     
@@ -318,7 +320,8 @@ async function updateMyProject(req, res) {
       id, 
       data: editData,
       isLogin: req.session.isLogin,
-      user: req.session.user
+      user: req.session.user,
+      defaultImage : editData.uploadImage
      })
   } catch (error) {
     throw error
@@ -333,8 +336,15 @@ async function postMyProject(req, res) {
   const { id } = req.params
   const { name, description, startdate, enddate } = req.body
   const program = reqProgram(req.body)
-  const image = req.file.filename
   const userid = req.session.idUser
+  const existingImage = await SequelizePool.query(`SELECT "uploadImage" FROM "Projects" WHERE "authorId" = ${id}`)
+  let image
+
+  if(req.file) {
+    image = req.file.filename
+  } else {
+    image = existingImage[0][0].uploadImage
+  }
 
   await SequelizePool.query(`UPDATE "Authors" SET "name"='${name}' WHERE "id" = ${id}`)
   await SequelizePool.query(`UPDATE "Projects" SET "startDate"='${startdate}', "endDate"='${enddate}', "description"='${description}', "technologies"='${JSON.stringify(program)}',"uploadImage"='${image}', "userid"='${userid}' WHERE "authorId"= ${id}`)

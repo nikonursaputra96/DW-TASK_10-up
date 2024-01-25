@@ -65,6 +65,7 @@
         </div>
     </nav>
 
+    {{#if isLogin}}
     <!-- FORM BOOTSTRAP -->
     <h2 class="mt-4 d-flex justify-content-center">ADD MY PROJECT</h2>
  
@@ -72,15 +73,15 @@
         <form class="row g-3" action="/myproject" method="POST" enctype="multipart/form-data">
             <div class="col-12">
                 <label for="projectName" class="form-label fw-bold">Project Name</label>
-                <input type="text" class="form-control" id="projectName" name="name">
+                <input type="text" class="form-control" id="projectName" name="name" required>
             </div>
             <div class="col-md-6">
                 <label for="startDate" class="form-label fw-bold">Start Date</label>
-                <input type="date" class="form-control" id="startDate" name="startdate">
+                <input type="date" class="form-control" id="startDate" name="startdate" required>
             </div>
             <div class="col-md-6">
                 <label for="endDate" class="form-label fw-bold">End Date</label>
-                <input type="date" class="form-control" id="endDate" name="enddate">
+                <input type="date" class="form-control" id="endDate" name="enddate" required>
             </div>
             <div>
                 <label class="mb-2 fw-bold" for="description">Description</label>
@@ -126,7 +127,7 @@
             <div class="mb-1">
                 <label for="formFile" class="form-label fw-bold">Upload Image</label>
                 <div>
-                    <input class="form-control d-none" accept="image/*" type="file" id="image" name="image">
+                    <input class="form-control d-none" accept="image/*" type="file" id="image" name="image" required>
                     <div class="d-flex">
                         <label class="btn btn-light" for="image">choose</label>
                         <label class="form-control" for="image">
@@ -142,7 +143,7 @@
         </form>
 
     </div>
-
+    {{/if}}
 
 
 
@@ -158,7 +159,7 @@
             <div class="container-card-2">
                 <div onclick="window.location.href='/detail/{{this.authorId}}';">
                     <div class="container-content">
-                        <img src="/upload/{{this.uploadImage}}" alt="smartphone" class="image-1">
+                        <img src="/upload/{{this.uploadImage}}" alt="imagecontent" class="image-1">
                         <h4>{{this.author_name}}</h4>
                         <span id="totalMonth">{{this.totalMonth}}</span>
                         <a href="/detail/{{this.authorId}}" class="text-reset text-decoration-none">
